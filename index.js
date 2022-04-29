@@ -34,6 +34,27 @@ async function run() {
             const items = await cursor.toArray();
             res.send(items);
         })
+
+        app.get('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const query = { _id: ObjectId(id) };
+            const result = await itemCollection.findOne(query);
+            res.send(result)
+        })
+
+        app.delete('/item/:_id', async (req, res) => {
+            const id = req.params._id;
+            const query = { _id: ObjectId(id) };
+            const result = await itemCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        app.post('/item', async (req, res) => {
+            const newItem = req.body;
+            const result = await itemCollection.insertOne(newItem);
+            res.send(result)
+        })
     }
     finally {
 
