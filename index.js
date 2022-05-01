@@ -13,7 +13,8 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-function varifyJWT(req, res, next) {
+// JWT verification section 
+function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         return res.status(401).send({ message: 'Unauthorized Access' });
@@ -27,19 +28,20 @@ function varifyJWT(req, res, next) {
             req.decoded = decoded;
             next();
         })
-
 }
 
+// --------------------------------------------
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0bkok.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-
 // --------------------------------------------
 
 async function run() {
     try {
         await client.connect();
+        // database and collections
         const itemCollection = client.db("inventory").collection("item");
 
+        // all items load 
         app.get('/item', async (req, res) => {
             const query = {};
             const cursor = itemCollection.find(query);
@@ -47,6 +49,7 @@ async function run() {
             res.send(items);
         })
 
+        // specific item load 
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -54,8 +57,8 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/myItems', varifyJWT, async (req, res) => {
-
+        // my items load for specific email and verified access token
+        app.get('/myItems', verifyJWT, async (req, res) => {
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
             if (decodedEmail === email) {
@@ -69,8 +72,7 @@ async function run() {
             }
         })
 
-
-
+        // delete item for specific id
         app.delete('/item/:_id', async (req, res) => {
             const id = req.params._id;
             const query = { _id: ObjectId(id) };
@@ -78,12 +80,14 @@ async function run() {
             res.send(result);
         })
 
+        // add item to inventory
         app.post('/addInventoryItem', async (req, res) => {
             const newItem = req.body;
             const result = await itemCollection.insertOne(newItem);
             res.send(result);
         })
 
+        // update specific item using it's id
         app.put('/inventory/:_id', async (req, res) => {
             const id = req.params._id;
             const updatedItem = req.body;
@@ -97,6 +101,8 @@ async function run() {
             const result = await itemCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         })
+
+        // access token giving section when an user logs in
         app.post('/login', async (req, res) => {
             const user = req.body;
             const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -109,6 +115,8 @@ async function run() {
 
     }
 }
+
+
 run().catch(console.dir)
 
 app.get('/', (req, res) => {
