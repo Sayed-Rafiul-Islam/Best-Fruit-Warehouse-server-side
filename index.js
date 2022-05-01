@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
@@ -31,10 +32,9 @@ async function run() {
 
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id)
             const query = { _id: ObjectId(id) };
             const result = await itemCollection.findOne(query);
-            res.send(result)
+            res.send(result);
         })
 
         app.get('/myItems', async (req, res) => {
@@ -42,7 +42,7 @@ async function run() {
             const query = { email: email };
             const cursor = itemCollection.find(query);
             const result = await cursor.toArray();
-            res.send(result)
+            res.send(result);
         })
 
 
@@ -51,13 +51,13 @@ async function run() {
             const id = req.params._id;
             const query = { _id: ObjectId(id) };
             const result = await itemCollection.deleteOne(query);
-            res.send(result)
+            res.send(result);
         })
 
         app.post('/addInventoryItem', async (req, res) => {
             const newItem = req.body;
             const result = await itemCollection.insertOne(newItem);
-            res.send(result)
+            res.send(result);
         })
 
         app.put('/inventory/:_id', async (req, res) => {
@@ -71,7 +71,14 @@ async function run() {
                 }
             };
             const result = await itemCollection.updateOne(filter, updatedDoc, options);
-            res.send(result)
+            res.send(result);
+        })
+        app.post('/login', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '2d'
+            });
+            res.send({ accessToken });
         })
     }
     finally {
