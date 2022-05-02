@@ -116,9 +116,7 @@ async function run() {
 
         // item count
         app.get('/itemCount', async (req, res) => {
-            const query = {};
-            const cursor = itemCollection.find(query);
-            const count = await cursor.count();
+            const count = await itemCollection.estimatedDocumentCount();
             res.send({ count });
         })
     }
