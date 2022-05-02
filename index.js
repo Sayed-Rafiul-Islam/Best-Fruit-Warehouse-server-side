@@ -111,6 +111,14 @@ async function run() {
             });
             res.send({ accessToken });
         })
+
+        // item count
+        app.get('/itemCount', async (req, res) => {
+            const query = {};
+            const cursor = itemCollection.find(query);
+            const count = await cursor.count();
+            res.send({ count });
+        })
     }
     finally {
 
