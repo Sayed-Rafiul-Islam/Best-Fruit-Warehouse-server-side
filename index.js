@@ -62,11 +62,11 @@ async function run() {
         app.get('/myItems', verifyJWT, async (req, res) => {
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
-            const page = req.query.page;
+            const page = parseInt(req.query.page);
             if (decodedEmail === email) {
                 const query = { email: email };
                 const cursor = itemCollection.find(query);
-                const result = await cursor.limit(10).toArray();
+                const result = await cursor.skip(page).limit(10).toArray();
                 res.send(result);
             }
             else {
@@ -117,6 +117,18 @@ async function run() {
         app.get('/itemCount', async (req, res) => {
             const count = await itemCollection.estimatedDocumentCount();
             res.send({ count });
+        })
+
+        // myItem count
+        app.get('/myItemsCount', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const email = req.query.email;
+            if (decodedEmail === email) {
+                const query = { email: email };
+                const cursor = itemCollection.find(query);
+                const count = await cursor.count();
+                res.send({ count });
+            }
         })
     }
     finally {
