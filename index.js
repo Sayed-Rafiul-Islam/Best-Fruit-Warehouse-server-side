@@ -73,17 +73,6 @@ async function run() {
             }
         })
 
-        app.get('/myItemsCount', verifyJWT, async (req, res) => {
-            const decodedEmail = req.decoded.email;
-            const email = req.query.email;
-            if (decodedEmail === email) {
-                const query = { email: email };
-                const cursor = itemCollection.find(query);
-                const result = await cursor.estimatedDocumentCount();
-                res.send(result);
-            }
-        })
-
         // delete item for specific id
         app.delete('/item/:_id', async (req, res) => {
             const id = req.params._id;
