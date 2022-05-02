@@ -44,7 +44,6 @@ async function run() {
         // all items load 
         app.get('/item', async (req, res) => {
             const page = parseInt(req.query.page);
-            console.log(page)
             const query = {};
             const cursor = itemCollection.find(query);
             const items = await cursor.skip(page * 10).limit(10).toArray();
@@ -63,7 +62,6 @@ async function run() {
         app.get('/myItems', verifyJWT, async (req, res) => {
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
-            console.log(email)
             if (decodedEmail === email) {
                 const query = { email: email };
                 const cursor = itemCollection.find(query);
@@ -72,6 +70,17 @@ async function run() {
             }
             else {
                 res.status(403).send({ message: 'Forbidden Access' })
+            }
+        })
+
+        app.get('/myItemsCount', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const email = req.query.email;
+            if (decodedEmail === email) {
+                const query = { email: email };
+                const cursor = itemCollection.find(query);
+                const result = await cursor.estimatedDocumentCount();
+                res.send(result);
             }
         })
 
