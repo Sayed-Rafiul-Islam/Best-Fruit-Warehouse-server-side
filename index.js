@@ -66,7 +66,7 @@ async function run() {
             if (decodedEmail === email) {
                 const query = { email: email };
                 const cursor = itemCollection.find(query);
-                const result = await cursor.skip(page).limit(10).toArray();
+                const result = await cursor.limit(10).toArray();
                 res.send(result);
             }
             else {
