@@ -20,7 +20,7 @@ function verifyJWT(req, res, next) {
         return res.status(401).send({ message: 'Unauthorized Access' });
     }
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET
+    jwt.verify(token, process.env.ACCESS_TOKEN
         , (err, decoded) => {
             if (err) {
                 return res.status(403).send({ message: 'Forbidden Access' });
@@ -30,15 +30,23 @@ function verifyJWT(req, res, next) {
         })
 }
 
-// --------------------------------------------
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0bkok.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+const uri = process.env.MONGO_URI;
+const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
 // --------------------------------------------
 
 async function run() {
     try {
         await client.connect();
         // database and collections
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
         const itemCollection = client.db("inventory").collection("item");
 
         // all items load 
@@ -107,7 +115,7 @@ async function run() {
         // access token giving section when an user logs in
         app.post('/login', async (req, res) => {
             const user = req.body;
-            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {
                 expiresIn: '2d'
             });
             res.send({ accessToken });
@@ -132,7 +140,7 @@ async function run() {
         })
     }
     finally {
-
+        // await client.close();
     }
 }
 
