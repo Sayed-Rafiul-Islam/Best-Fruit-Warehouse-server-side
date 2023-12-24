@@ -45,7 +45,7 @@ async function run() {
     try {
         client.connect();
         // database and collections
-        await client.db("admin").command({ ping: 1 });
+        client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
         const itemCollection = client.db("inventory").collection("item");
 
