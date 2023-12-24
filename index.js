@@ -51,11 +51,11 @@ async function run() {
 
         // all items load 
         app.get('/item', async (req, res) => {
-            const page = parseInt(req.query.page);
-            const query = {};
-            const cursor = itemCollection.find(query);
-            const items = await cursor.skip(page * 10).limit(10).toArray();
-            res.send(items);
+            // const page = parseInt(req.query.page);
+            // const query = {};
+            // const cursor = itemCollection.find(query);
+            // const items = await cursor.skip(page * 10).limit(10).toArray();
+            res.send("item");
         })
 
         // specific item load 
